@@ -10,9 +10,11 @@ namespace BlogDemo.Api.Controllers
     public class PostController : Controller
     {
         private readonly IPostRepository _postRepository;
-        public PostController(IPostRepository postRepository)
+        private readonly IUnitOfWork _unitOfWork;
+        public PostController(IPostRepository postRepository , IUnitOfWork unitOfWork)
         {
             _postRepository = postRepository;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
@@ -21,6 +23,8 @@ namespace BlogDemo.Api.Controllers
             var posts = await _postRepository.GetAllPosts();
             return Ok(posts);
         }
+
+        
 
     }
 }
