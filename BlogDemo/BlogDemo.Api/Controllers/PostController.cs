@@ -1,10 +1,13 @@
-﻿using BlogDemo.Core.Entities;
+﻿using AutoMapper;
+using BlogDemo.Core.Entities;
 using BlogDemo.Core.Interfaces;
 using BlogDemo.Infrastructure.DataBase;
+using BlogDemo.Infrastructure.Resources;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BlogDemo.Api.Controllers
@@ -15,14 +18,17 @@ namespace BlogDemo.Api.Controllers
         private readonly IPostRepository _postRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
+        private readonly IMapper _mapper;
         public PostController(
             IPostRepository postRepository , 
             IUnitOfWork unitOfWork,
-            ILoggerFactory logger)
+            ILoggerFactory logger , 
+            IMapper mapper)
         {
             _postRepository = postRepository;
             _unitOfWork = unitOfWork;
             _logger = logger.CreateLogger("BlogDemo.Api.Controllers.PostController");
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -30,10 +36,11 @@ namespace BlogDemo.Api.Controllers
         {
             var posts = await _postRepository.GetAllPosts();
 
+            var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostViewModel>>(posts);
             //throw new Exception("Error!!!");
             _logger.LogError("Get All Posts...");
 
-            return Ok(posts);
+            return Ok(postViewModels);
         }
 
         [HttpPost]

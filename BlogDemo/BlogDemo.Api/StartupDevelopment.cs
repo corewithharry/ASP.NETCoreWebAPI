@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using BlogDemo.Api.Extensions;
 using BlogDemo.Core.Interfaces;
 using BlogDemo.Infrastructure.DataBase;
@@ -48,6 +49,7 @@ namespace BlogDemo.Api
 
             services.AddScoped<IPostRepository, PostRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddAutoMapper();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
