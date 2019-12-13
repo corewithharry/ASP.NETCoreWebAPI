@@ -30,6 +30,7 @@ namespace BlogDemo.Api.Controllers
         {
             var posts = await _postRepository.GetAllPosts();
 
+            //throw new Exception("Error!!!");
             _logger.LogError("Get All Posts...");
 
             return Ok(posts);

@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlogDemo.Api.Extensions;
 using BlogDemo.Core.Interfaces;
 using BlogDemo.Infrastructure.DataBase;
 using BlogDemo.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace BlogDemo.Api
 {
@@ -48,9 +51,10 @@ namespace BlogDemo.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, ILoggerFactory logger)
         {
-            app.UseDeveloperExceptionPage();
+            //app.UseDeveloperExceptionPage();
+            app.UseMyExceptionHandler(logger);
             app.UseHttpsRedirection();
             app.UseMvc();
         }
