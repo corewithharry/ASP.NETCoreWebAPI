@@ -22,6 +22,11 @@ namespace BlogDemo.Infrastructure.Repositories
             return await _myContext.Posts.ToListAsync();
         }
 
+        public async Task<Post> GetPostByIdAsync(int id)
+        {
+            return await _myContext.Posts.FindAsync(id);
+        }
+
         public void AddPost(Post post)
         {
             _myContext.Posts.Add(post);

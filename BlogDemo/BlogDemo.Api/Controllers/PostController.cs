@@ -38,9 +38,19 @@ namespace BlogDemo.Api.Controllers
 
             var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostViewModel>>(posts);
             //throw new Exception("Error!!!");
-            _logger.LogError("Get All Posts...");
+            //_logger.LogError("Get All Posts...");
 
             return Ok(postViewModels);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var post =await _postRepository.GetPostByIdAsync(id);
+            if (post == null)
+                return NotFound();
+            var postViewModel = _mapper.Map<Post, PostViewModel>(post);
+            return Ok(postViewModel);
         }
 
         [HttpPost]
