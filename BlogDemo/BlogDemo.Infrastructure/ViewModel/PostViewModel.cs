@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BlogDemo.Infrastructure.Resources
+namespace BlogDemo.Infrastructure.ViewModel
 {
     public class PostViewModel
     {

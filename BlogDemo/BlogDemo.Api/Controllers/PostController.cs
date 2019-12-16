@@ -2,7 +2,7 @@
 using BlogDemo.Core.Entities;
 using BlogDemo.Core.Interfaces;
 using BlogDemo.Infrastructure.DataBase;
-using BlogDemo.Infrastructure.Resources;
+using BlogDemo.Infrastructure.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

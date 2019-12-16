@@ -7,6 +7,8 @@ using BlogDemo.Api.Extensions;
 using BlogDemo.Core.Interfaces;
 using BlogDemo.Infrastructure.DataBase;
 using BlogDemo.Infrastructure.Repositories;
+using BlogDemo.Infrastructure.ViewModel;
+using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -50,6 +52,8 @@ namespace BlogDemo.Api
             services.AddScoped<IPostRepository, PostRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddAutoMapper();
+
+            services.AddTransient<IValidator<PostViewModel>, PostViewModelValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

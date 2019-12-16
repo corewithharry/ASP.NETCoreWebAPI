@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using BlogDemo.Core.Entities;
-using BlogDemo.Infrastructure.Resources;
+using BlogDemo.Infrastructure.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
