@@ -6,6 +6,8 @@ using BlogDemo.Infrastructure.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -32,13 +34,23 @@ namespace BlogDemo.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(PostParameters postParameters)
         {
-            var posts = await _postRepository.GetAllPosts();
+            var postlist = await _postRepository.GetAllPostsAsync(postParameters);
 
-            var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostViewModel>>(posts);
-            //throw new Exception("Error!!!");
-            //_logger.LogError("Get All Posts...");
+            var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostViewModel>>(postlist);
+
+            var meta = new
+            {
+                Pagesize = postlist.PageSize,
+                PageIndex = postlist.PageIndex,
+                TotalItemCount = postlist.TotalItemsCount,
+                PageCount = postlist.PageCount
+            };
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta , new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            }));
 
             return Ok(postViewModels);
         }
