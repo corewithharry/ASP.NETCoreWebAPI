@@ -7,6 +7,7 @@ using BlogDemo.Api.Extensions;
 using BlogDemo.Core.Interfaces;
 using BlogDemo.Infrastructure.DataBase;
 using BlogDemo.Infrastructure.Repositories;
+using BlogDemo.Infrastructure.Services;
 using BlogDemo.Infrastructure.ViewModel;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
@@ -69,6 +70,10 @@ namespace BlogDemo.Api
                 var actionContext = factory.GetService<IActionContextAccessor>().ActionContext;
                 return new UrlHelper(actionContext);
             });
+
+            var propertyMappingContainer = new PropertyMappingContainer();
+            propertyMappingContainer.Register<PostPropertyMapping>();
+            services.AddSingleton<IPropertyMappingContainer>(propertyMappingContainer);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
