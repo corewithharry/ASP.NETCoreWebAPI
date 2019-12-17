@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BlogDemo.Core.Entities
 {
-    enum PaginationResourceUriType
+    public enum PaginationResourceUriType
     {
         CurrentPage,
         PerviousPage,

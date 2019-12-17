@@ -21,31 +21,39 @@ namespace BlogDemo.Api.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
+        private readonly IUrlHelper _urlHelper;
         public PostController(
             IPostRepository postRepository , 
             IUnitOfWork unitOfWork,
             ILoggerFactory logger , 
-            IMapper mapper)
+            IMapper mapper,
+            IUrlHelper urlHelper)
         {
             _postRepository = postRepository;
             _unitOfWork = unitOfWork;
             _logger = logger.CreateLogger("BlogDemo.Api.Controllers.PostController");
             _mapper = mapper;
+            _urlHelper = urlHelper;
         }
 
-        [HttpGet]
+        [HttpGet(Name ="GetPosts")]
         public async Task<IActionResult> Get(PostParameters postParameters)
         {
             var postlist = await _postRepository.GetAllPostsAsync(postParameters);
 
             var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostViewModel>>(postlist);
 
+            var previousPageLink = postlist.HasPrevious ? CreatePostUri(postParameters, PaginationResourceUriType.PerviousPage) : null;
+            var nextPageLink = postlist.HasNext ? CreatePostUri(postParameters, PaginationResourceUriType.NextPage): null;
+
             var meta = new
             {
-                Pagesize = postlist.PageSize,
-                PageIndex = postlist.PageIndex,
-                TotalItemCount = postlist.TotalItemsCount,
-                PageCount = postlist.PageCount
+                postlist.PageSize,
+                postlist.PageIndex,
+                postlist.TotalItemsCount,
+                postlist.PageCount ,
+                previousPageLink,
+                nextPageLink
             };
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta , new JsonSerializerSettings
             {
@@ -81,7 +89,40 @@ namespace BlogDemo.Api.Controllers
             return Ok();
         }
 
-        
+        private string CreatePostUri(PostParameters parameters , PaginationResourceUriType uriType)
+        {
+            switch (uriType)
+            {
+                case PaginationResourceUriType.PerviousPage:
+                    var previousParameters = new
+                    {
+
+                        PageIndex = parameters.PageIndex - 1,
+                        PageSize = parameters.PageSize,
+                        OrderBy = parameters.OrderBy,
+                        Fileds = parameters.Fields
+                    };
+                    return _urlHelper.Link("GetPosts", previousParameters);
+                case PaginationResourceUriType.NextPage:
+                    var nextParameters = new
+                    {
+                        PageIndex = parameters.PageIndex + 1,
+                        PageSize = parameters.PageSize,
+                        OrderBy = parameters.OrderBy,
+                        Fileds = parameters.Fields
+                    };
+                    return _urlHelper.Link("GetPosts", nextParameters);
+                default:
+                    var currentParameters = new
+                    {
+                        PageIndex = parameters.PageIndex,
+                        PageSize = parameters.PageSize,
+                        OrderBy = parameters.OrderBy,
+                        Fileds = parameters.Fields
+                    };
+                    return _urlHelper.Link("GetPosts", currentParameters);
+            }
+        }
 
     }
 }
