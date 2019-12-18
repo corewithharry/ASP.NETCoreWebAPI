@@ -2,6 +2,7 @@
 using BlogDemo.Core.Entities;
 using BlogDemo.Core.Interfaces;
 using BlogDemo.Infrastructure.DataBase;
+using BlogDemo.Infrastructure.Extensions;
 using BlogDemo.Infrastructure.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,8 @@ namespace BlogDemo.Api.Controllers
 
             var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostViewModel>>(postlist);
 
+            var shapedPostViewModels = postViewModels.ToDynamicIEnumerable(postParameters.Fields);
+
             var previousPageLink = postlist.HasPrevious ? CreatePostUri(postParameters, PaginationResourceUriType.PerviousPage) : null;
             var nextPageLink = postlist.HasNext ? CreatePostUri(postParameters, PaginationResourceUriType.NextPage): null;
 
@@ -60,17 +63,20 @@ namespace BlogDemo.Api.Controllers
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             }));
 
-            return Ok(postViewModels);
+            return Ok(shapedPostViewModels);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(int id , string fields)
         {
             var post =await _postRepository.GetPostByIdAsync(id);
             if (post == null)
                 return NotFound();
             var postViewModel = _mapper.Map<Post, PostViewModel>(post);
-            return Ok(postViewModel);
+
+            var shapedPostViewModels = postViewModel.ToDynamic(fields);
+
+            return Ok(shapedPostViewModels);
         }
 
         [HttpPost]

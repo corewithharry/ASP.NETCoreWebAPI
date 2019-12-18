@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 
 namespace BlogDemo.Api
 {
@@ -42,6 +43,10 @@ namespace BlogDemo.Api
             {
                 options.ReturnHttpNotAcceptable = true;
                 options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+            })
+            .AddJsonOptions(options=>
+            {
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             });
 
             services.AddDbContext<MyContext>(options =>
