@@ -2,12 +2,10 @@
 using BlogDemo.Api.Helpers;
 using BlogDemo.Core.Entities;
 using BlogDemo.Core.Interfaces;
-using BlogDemo.Infrastructure.DataBase;
 using BlogDemo.Infrastructure.Extensions;
 using BlogDemo.Infrastructure.Services;
 using BlogDemo.Infrastructure.ViewModel;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -155,20 +153,28 @@ namespace BlogDemo.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Post()
+        [HttpPost(Name ="CreatePost")]
+        public async Task<IActionResult> Post([FromBody] PostAddViewModel postAddViewModel)
         {
-            var newPost = new Post
-            {
-                Author = "admin",
-                Body = "123123123123123123123",
-                Title = "Title A",
-                LastModified = DateTime.Now
-            };
-
+            if (postAddViewModel == null)
+                return BadRequest();
+            var newPost = _mapper.Map<PostAddViewModel, Post>(postAddViewModel);
+            newPost.Author = "admin";
+            newPost.LastModified = DateTime.Now;
             _postRepository.AddPost(newPost);
-            await _unitOfWork.SaveAsync();
-            return Ok();
+            if(!await _unitOfWork.SaveAsync())
+            {
+                throw new Exception("Save Failed!");
+            }
+
+            var resultViewModel = _mapper.Map<Post, PostViewModel>(newPost);
+
+            var links = CreateLinkForPost(newPost.Id);
+            var linkedPostViewModel = resultViewModel.ToDynamic() as IDictionary<string, object>;
+            linkedPostViewModel.Add("links" , links);
+
+            return CreatedAtRoute("GetPost" ,  new { id = linkedPostViewModel ["Id"]} , linkedPostViewModel);
+
         }
 
         private string CreatePostUri(PostParameters parameters , PaginationResourceUriType uriType)
