@@ -10,6 +10,7 @@ using BlogDemo.Infrastructure.Repositories;
 using BlogDemo.Infrastructure.Services;
 using BlogDemo.Infrastructure.ViewModel;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -43,6 +44,11 @@ namespace BlogDemo.Api
             {
                 options.ReturnHttpNotAcceptable = true;
                 //options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+
+                var inputFromatter = options.InputFormatters.OfType<JsonInputFormatter>().FirstOrDefault();
+                if (inputFromatter != null)
+                    inputFromatter.SupportedMediaTypes.Add("application.vnd.hy.post.create + json");
+
                 var outputFormatter = options.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
                 if(outputFormatter!=null)
                 {
@@ -52,7 +58,8 @@ namespace BlogDemo.Api
             .AddJsonOptions(options=>
             {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            });
+            })
+            .AddFluentValidation();
 
             services.AddDbContext<MyContext>(options =>
             {
@@ -73,6 +80,8 @@ namespace BlogDemo.Api
             services.AddAutoMapper();
 
             services.AddTransient<IValidator<PostViewModel>, PostViewModelValidator>();
+            services.AddTransient<IValidator<PostAddViewModel> , PostAddOrUpdateViewModelValidator<PostAddViewModel>>();
+            services.AddTransient<IValidator<PostAddOrUpdateViewModel>, PostAddOrUpdateViewModelValidator<PostAddOrUpdateViewModel>>();
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(factory =>

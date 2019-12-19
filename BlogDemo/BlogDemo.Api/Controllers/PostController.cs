@@ -154,10 +154,15 @@ namespace BlogDemo.Api.Controllers
         }
 
         [HttpPost(Name ="CreatePost")]
+        [RequestHeaderMatchingMediaType("Content-Type" ,new[] { "application.vnd.hy.post.create+json"})]
         public async Task<IActionResult> Post([FromBody] PostAddViewModel postAddViewModel)
         {
             if (postAddViewModel == null)
                 return BadRequest();
+
+            if (!ModelState.IsValid)
+                return UnprocessableEntity(ModelState);
+
             var newPost = _mapper.Map<PostAddViewModel, Post>(postAddViewModel);
             newPost.Author = "admin";
             newPost.LastModified = DateTime.Now;
