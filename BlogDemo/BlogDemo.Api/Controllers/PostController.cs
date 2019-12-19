@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlogDemo.Api.Controllers
@@ -58,6 +59,22 @@ namespace BlogDemo.Api.Controllers
 
             var shapedPostViewModels = postViewModels.ToDynamicIEnumerable(postParameters.Fields);
 
+            var shapedWithLinks = shapedPostViewModels.Select(x =>
+            {
+                var dict = x as IDictionary<string, object>;
+                var postLinks = CreateLinkForPost((int)dict["Id"], postParameters.Fields);
+                dict.Add("links", postLinks);
+                return dict;
+
+            });
+
+            var links = CreateLinksForPosts(postParameters, postlist.HasPrevious, postlist.HasNext);
+            var result = new
+            {
+                value = shapedWithLinks,
+                links
+            };
+
             var previousPageLink = postlist.HasPrevious ? CreatePostUri(postParameters, PaginationResourceUriType.PerviousPage) : null;
             var nextPageLink = postlist.HasNext ? CreatePostUri(postParameters, PaginationResourceUriType.NextPage): null;
 
@@ -75,11 +92,11 @@ namespace BlogDemo.Api.Controllers
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             }));
 
-            return Ok(shapedPostViewModels);
+            return Ok(result);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id , string fields)
+        [HttpGet("{id}" , Name ="GetPost")]
+        public async Task<IActionResult> Get(int id , string fields = null)
         {
             if (!_typeHelperService.TypeHasProperties<PostViewModel>(fields))
                 return BadRequest("Fields not exist");
@@ -90,7 +107,13 @@ namespace BlogDemo.Api.Controllers
 
             var shapedPostViewModels = postViewModel.ToDynamic(fields);
 
-            return Ok(shapedPostViewModels);
+            var links = CreateLinkForPost(id, fields);
+
+            var result = (IDictionary<string, object>)shapedPostViewModels;
+
+            result.Add("links", links);
+
+            return Ok(result);
         }
 
         [HttpPost]
@@ -144,5 +167,40 @@ namespace BlogDemo.Api.Controllers
             }
         }
 
+        private IEnumerable<LinkViewModel> CreateLinkForPost(int id,string fields = null)
+        {
+            var links = new List<LinkViewModel>();
+            if (string.IsNullOrWhiteSpace(fields))
+            {
+                links.Add(new LinkViewModel(_urlHelper.Link("GetPost" , new { id}) , "self" ,"GET"));
+            }
+            else
+            {
+                links.Add(new LinkViewModel(_urlHelper.Link("GetPost", new { id, fields }), "self", "GET"));
+            }
+
+            links.Add(new LinkViewModel(_urlHelper.Link("DeletePost", new { id }), "delete_post", "DELETE"));
+            return links;
+        }
+
+        private IEnumerable<LinkViewModel> CreateLinksForPosts(PostParameters postParameters , bool hasPrevious , bool hasNext)
+        {
+            var links = new List<LinkViewModel>
+            {
+                new LinkViewModel(CreatePostUri(postParameters , PaginationResourceUriType.CurrentPage) , "self" , "GET")
+            };
+
+            if (hasPrevious)
+            {
+                links.Add(new LinkViewModel(CreatePostUri(postParameters, PaginationResourceUriType.PerviousPage), "previous_page", "GET"));
+            }
+
+            if (hasNext)
+            {
+                links.Add(new LinkViewModel(CreatePostUri(postParameters, PaginationResourceUriType.NextPage), "next_page", "GET"));
+            }
+
+            return links;
+        }
     }
 }
