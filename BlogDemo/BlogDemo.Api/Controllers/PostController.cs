@@ -47,6 +47,9 @@ namespace BlogDemo.Api.Controllers
         [HttpGet(Name ="GetPosts")]
         public async Task<IActionResult> Get(PostParameters postParameters)
         {
+            if (!_propertyMappingContainer.ValidateMappingExistsFor<PostViewModel, Post>(postParameters.OrderBy))
+                return BadRequest("Can't finds fields for sorting");
+
             if (!_typeHelperService.TypeHasProperties<PostViewModel>(postParameters.Fields))
                 return BadRequest("Fields not exist");
             var postlist = await _postRepository.GetAllPostsAsync(postParameters);
@@ -78,6 +81,8 @@ namespace BlogDemo.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id , string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<PostViewModel>(fields))
+                return BadRequest("Fields not exist");
             var post =await _postRepository.GetPostByIdAsync(id);
             if (post == null)
                 return NotFound();
