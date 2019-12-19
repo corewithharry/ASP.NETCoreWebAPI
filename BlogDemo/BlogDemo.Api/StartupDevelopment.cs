@@ -42,7 +42,12 @@ namespace BlogDemo.Api
             services.AddMvc(options=>
             {
                 options.ReturnHttpNotAcceptable = true;
-                options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+                //options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+                var outputFormatter = options.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
+                if(outputFormatter!=null)
+                {
+                    outputFormatter.SupportedMediaTypes.Add("application/vnd.hy.hateoas+json");
+                }
             })
             .AddJsonOptions(options=>
             {

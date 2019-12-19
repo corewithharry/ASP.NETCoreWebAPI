@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BlogDemo.Api.Helpers;
 using BlogDemo.Core.Entities;
 using BlogDemo.Core.Interfaces;
 using BlogDemo.Infrastructure.DataBase;
@@ -46,7 +47,8 @@ namespace BlogDemo.Api.Controllers
         }
 
         [HttpGet(Name ="GetPosts")]
-        public async Task<IActionResult> Get(PostParameters postParameters)
+        [RequestHeaderMatchingMediaType("Accept" , new[] { "application/vnd.hy.hateoas+json"})]
+        public async Task<IActionResult> GetHateoas(PostParameters postParameters , [FromHeader(Name ="Accept")] string mediaType)
         {
             if (!_propertyMappingContainer.ValidateMappingExistsFor<PostViewModel, Post>(postParameters.OrderBy))
                 return BadRequest("Can't finds fields for sorting");
@@ -75,25 +77,62 @@ namespace BlogDemo.Api.Controllers
                 links
             };
 
-            var previousPageLink = postlist.HasPrevious ? CreatePostUri(postParameters, PaginationResourceUriType.PerviousPage) : null;
-            var nextPageLink = postlist.HasNext ? CreatePostUri(postParameters, PaginationResourceUriType.NextPage): null;
 
             var meta = new
             {
                 postlist.PageSize,
                 postlist.PageIndex,
                 postlist.TotalItemsCount,
-                postlist.PageCount ,
-                previousPageLink,
-                nextPageLink
+                postlist.PageCount
+
             };
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta , new JsonSerializerSettings
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta, new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             }));
 
             return Ok(result);
+
+
         }
+
+        [HttpGet(Name = "GetPosts")]
+        [RequestHeaderMatchingMediaType("Accept", new[] { "application/json" })]
+        public async Task<IActionResult> Get(PostParameters postParameters, [FromHeader(Name = "Accept")] string mediaType)
+        {
+            if (!_propertyMappingContainer.ValidateMappingExistsFor<PostViewModel, Post>(postParameters.OrderBy))
+                return BadRequest("Can't finds fields for sorting");
+
+            if (!_typeHelperService.TypeHasProperties<PostViewModel>(postParameters.Fields))
+                return BadRequest("Fields not exist");
+            var postlist = await _postRepository.GetAllPostsAsync(postParameters);
+
+            var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostViewModel>>(postlist);
+
+            var shapedPostViewModels = postViewModels.ToDynamicIEnumerable(postParameters.Fields);
+
+            var previousPageLink = postlist.HasPrevious ? CreatePostUri(postParameters, PaginationResourceUriType.PerviousPage) : null;
+            var nextPageLink = postlist.HasNext ? CreatePostUri(postParameters, PaginationResourceUriType.NextPage) : null;
+
+            var meta = new
+            {
+                postlist.PageSize,
+                postlist.PageIndex,
+                postlist.TotalItemsCount,
+                postlist.PageCount,
+                previousPageLink,
+                nextPageLink
+            };
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            }));
+
+            return Ok(shapedPostViewModels);
+
+
+        }
+
 
         [HttpGet("{id}" , Name ="GetPost")]
         public async Task<IActionResult> Get(int id , string fields = null)
