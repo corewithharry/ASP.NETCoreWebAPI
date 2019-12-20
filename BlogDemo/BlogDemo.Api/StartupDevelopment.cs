@@ -47,7 +47,7 @@ namespace BlogDemo.Api
 
                 var inputFromatter = options.InputFormatters.OfType<JsonInputFormatter>().FirstOrDefault();
                 if (inputFromatter != null)
-                    inputFromatter.SupportedMediaTypes.Add("application.vnd.hy.post.create + json");
+                    inputFromatter.SupportedMediaTypes.Add("application/vnd.hy.post.create+json");
 
                 var outputFormatter = options.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
                 if(outputFormatter!=null)

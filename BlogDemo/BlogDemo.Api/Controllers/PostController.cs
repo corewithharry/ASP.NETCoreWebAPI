@@ -154,7 +154,8 @@ namespace BlogDemo.Api.Controllers
         }
 
         [HttpPost(Name ="CreatePost")]
-        [RequestHeaderMatchingMediaType("Content-Type" ,new[] { "application.vnd.hy.post.create+json"})]
+        [RequestHeaderMatchingMediaType("Content-Type" ,new[] { "application/vnd.hy.post.create+json"})]
+        [RequestHeaderMatchingMediaType("Accept" , new[] { "application/vnd.hy.hateoas+json" })]
         public async Task<IActionResult> Post([FromBody] PostAddViewModel postAddViewModel)
         {
             if (postAddViewModel == null)
