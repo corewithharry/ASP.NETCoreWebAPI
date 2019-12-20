@@ -47,7 +47,10 @@ namespace BlogDemo.Api
 
                 var inputFromatter = options.InputFormatters.OfType<JsonInputFormatter>().FirstOrDefault();
                 if (inputFromatter != null)
-                    inputFromatter.SupportedMediaTypes.Add("application/vnd.hy.post.create+json");
+                { 
+                    inputFromatter.SupportedMediaTypes.Add("application/vnd.hy.post.create+json");                    
+                    inputFromatter.SupportedMediaTypes.Add("application/vnd.hy.post.update+json");
+                }
 
                 var outputFormatter = options.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
                 if(outputFormatter!=null)
@@ -81,7 +84,7 @@ namespace BlogDemo.Api
 
             services.AddTransient<IValidator<PostViewModel>, PostViewModelValidator>();
             services.AddTransient<IValidator<PostAddViewModel> , PostAddOrUpdateViewModelValidator<PostAddViewModel>>();
-            services.AddTransient<IValidator<PostAddOrUpdateViewModel>, PostAddOrUpdateViewModelValidator<PostAddOrUpdateViewModel>>();
+            services.AddTransient<IValidator<PostUpdateViewModel>, PostAddOrUpdateViewModelValidator<PostUpdateViewModel>>();
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(factory =>

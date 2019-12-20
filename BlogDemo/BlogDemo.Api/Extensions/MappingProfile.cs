@@ -17,7 +17,7 @@ namespace BlogDemo.Api.Extensions
             CreateMap<PostViewModel, Post>()
                 .ForMember(dest => dest.LastModified, opt => opt.MapFrom(src => src.UpdateTime));
             CreateMap<PostAddViewModel, Post>();
-            CreateMap<PostAddOrUpdateViewModel, Post>();
+            CreateMap<PostUpdateViewModel, Post>();
 
         }
     }

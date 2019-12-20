@@ -197,6 +197,28 @@ namespace BlogDemo.Api.Controllers
             return NoContent();
         }
 
+        [HttpPut("{id}", Name = "UpdatePost")]
+        [RequestHeaderMatchingMediaType("Content-Type", new[] { "application/vnd.hy.post.update+json" })]
+        public async Task<IActionResult> UpdatePost(int id, [FromBody] PostUpdateViewModel postUpdate) {
+            if (postUpdate == null)
+                return BadRequest();
+            if (!ModelState.IsValid)
+                return new MyUnprocessableEntityObjectResult(ModelState);
+
+            var post = await _postRepository.GetPostByIdAsync(id);
+            if (post == null)
+                return NotFound();
+
+            post.LastModified = DateTime.Now;
+            _mapper.Map(postUpdate, post);
+            if(!await _unitOfWork.SaveAsync())
+            {
+                throw new Exception($"Updating post {id} failed when saving");
+            }
+            return NoContent();
+        }
+
+
 
 
         private string CreatePostUri(PostParameters parameters , PaginationResourceUriType uriType)
