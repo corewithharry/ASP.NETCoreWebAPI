@@ -52,5 +52,15 @@ namespace BlogDemo.Infrastructure.Repositories
         {
             _myContext.Posts.Add(post);
         }
+
+        public void Delete(Post post)
+        {
+            _myContext.Posts.Remove(post);
+        }
+
+        public void Update(Post post)
+        {
+            _myContext.Entry(post).State = EntityState.Modified;
+        }
     }
 }

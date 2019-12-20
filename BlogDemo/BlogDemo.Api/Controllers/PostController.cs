@@ -162,7 +162,7 @@ namespace BlogDemo.Api.Controllers
                 return BadRequest();
 
             if (!ModelState.IsValid)
-                return UnprocessableEntity(ModelState);
+                return new MyUnprocessableEntityObjectResult(ModelState);
 
             var newPost = _mapper.Map<PostAddViewModel, Post>(postAddViewModel);
             newPost.Author = "admin";
@@ -182,6 +182,22 @@ namespace BlogDemo.Api.Controllers
             return CreatedAtRoute("GetPost" ,  new { id = linkedPostViewModel ["Id"]} , linkedPostViewModel);
 
         }
+
+        [HttpDelete("{id}" , Name ="DeletePost")]
+        public async Task<IActionResult> DeletePost(int id)
+        {
+            var post = await _postRepository.GetPostByIdAsync(id);
+            if (post == null)
+                return NotFound();
+            _postRepository.Delete(post);
+            if(! await _unitOfWork.SaveAsync())
+            {
+                throw new Exception($"Deleting post {id} failed when saving");
+            }
+            return NoContent();
+        }
+
+
 
         private string CreatePostUri(PostParameters parameters , PaginationResourceUriType uriType)
         {
