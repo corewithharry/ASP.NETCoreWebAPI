@@ -5,6 +5,7 @@ using BlogDemo.Core.Interfaces;
 using BlogDemo.Infrastructure.Extensions;
 using BlogDemo.Infrastructure.Services;
 using BlogDemo.Infrastructure.ViewModel;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -218,7 +219,34 @@ namespace BlogDemo.Api.Controllers
             return NoContent();
         }
 
+        [HttpPatch("{id}" , Name ="PartiallyUpdatePost")]
+        public async Task<IActionResult> PartiallyUpdate(int id , [FromBody]JsonPatchDocument<PostUpdateViewModel> patchDoc)
+        {
+            if (patchDoc == null)
+                return BadRequest();
+            var post = await _postRepository.GetPostByIdAsync(id);
+            if (post == null)
+                return NotFound();
 
+            var postToPatch = _mapper.Map<PostUpdateViewModel>(post);
+            patchDoc.ApplyTo(postToPatch, ModelState);
+            TryValidateModel(postToPatch);
+            if (!ModelState.IsValid)
+            {
+                return new MyUnprocessableEntityObjectResult(ModelState);
+            }
+
+            _mapper.Map(postToPatch, post);
+            post.LastModified = DateTime.Now;
+            _postRepository.Update(post);
+
+            if(!await _unitOfWork.SaveAsync())
+            {
+                throw new Exception($"Patching city {id} failed when saving.");
+            }
+
+            return NoContent();
+        }
 
 
         private string CreatePostUri(PostParameters parameters , PaginationResourceUriType uriType)

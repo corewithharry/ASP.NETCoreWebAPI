@@ -50,6 +50,7 @@ namespace BlogDemo.Api
                 { 
                     inputFromatter.SupportedMediaTypes.Add("application/vnd.hy.post.create+json");                    
                     inputFromatter.SupportedMediaTypes.Add("application/vnd.hy.post.update+json");
+                    //inputFromatter.SupportedMediaTypes.Add("application/json-patch+json");
                 }
 
                 var outputFormatter = options.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
