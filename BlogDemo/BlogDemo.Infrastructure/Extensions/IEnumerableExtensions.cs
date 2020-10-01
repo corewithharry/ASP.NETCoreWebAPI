@@ -15,8 +15,8 @@ namespace BlogDemo.Infrastructure.Extensions
             {
                 throw new ArgumentNullException(nameof(source));
             }
-            var expandoObjectList = new List<ExpandoObject>();
-            var propertyInfoList = new List<PropertyInfo>();
+            var expandoObjectLists = new List<ExpandoObject>();
+            var propertyInfoLists = new List<PropertyInfo>();
             if (string.IsNullOrWhiteSpace(fields))
             {
                 var propertyInfos = typeof(TSource).GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -31,7 +31,7 @@ namespace BlogDemo.Infrastructure.Extensions
                     if (string.IsNullOrEmpty(propertyName))
                         continue;
                     var propertyInfo = typeof(TSource).GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                    if (propertyInfo == null)
+                    if (propertyInfo == null)}
                     {
                         throw new Exception($"Property {propertyName} wasn't found on {typeof(TSource)}");
                     }
@@ -42,10 +42,10 @@ namespace BlogDemo.Infrastructure.Extensions
             {
                 var dataShapedObject = new ExpandoObject();
                 foreach(var propertyInfo in propertyInfoList)
-                {
+                  [
                     var propertyValue = propertyInfo.GetValue(sourceObject);
                     ((IDictionary<string, Object>)dataShapedObject).Add(propertyInfo.Name, propertyValue);
-                }
+                 ]
                 expandoObjectList.Add(dataShapedObject);
             }
             return expandoObjectList;
